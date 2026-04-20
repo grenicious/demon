@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zDEMON // SYSTEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --z-bg: #030305;
+            --z-panel: #0f0f13;
+            --z-primary: #8a2be2; /* Electric Violet */
+            --z-accent: #00f3ff;  /* Cyan */
+            --z-danger: #ff0055;
+            --z-text: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--z-bg);
+            color: var(--z-text);
+            font-family: 'Share Tech Mono', monospace;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+
+        /* --- BACKGROUND GRID --- */
+        .cyber-grid {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background-image: 
+                linear-gradient(rgba(138, 43, 226, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(138, 43, 226, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform: perspective(500px) rotateX(60deg);
+            animation: gridMove 20s linear infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(40px); }
+        }
+
+        /* --- LOADER --- */
+        #z-loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--z-bg);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.6s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
+        .scanner-line {
+            width: 300px;
+            height: 2px;
+            background: var(--z-accent);
+            box-shadow: 0 0 15px var(--z-accent);
+            animation: scan 1.5s infinite ease-in-out;
+        }
+
+        .loader-text {
+            margin-top: 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: 4px;
+            color: var(--z-primary);
+        }
+
+        /* --- MAIN INTERFACE --- */
+        #interface {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            opacity: 0;
+            transform: scale(0.9) rotateX(10deg);
+            transition: all 0.8s ease;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--z-panel);
+            padding-bottom: 10px;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: 3rem;
+            line-height: 1;
+            background: linear-gradient(to right, #fff, var(--z-primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+        }
+
+        .header-meta {
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--z-accent);
+        }
+
+        /* --- GRID SYSTEM --- */
+        .module-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* --- MODULE CARDS --- */
+        .module {
+            background: rgba(15, 15, 19, 0.8);
+            border: 1px solid #333;
+            padding: 20px;
+            position: relative;
+            clip-path: polygon(
+                0 0, 
+                100% 0, 
+                100% calc(100% - 20px), 
+                calc(100% - 20px) 100%, 
+                0 100%
+            ); /* Sci-fi corner cut */
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .module::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: #333;
+            transition: 0.3s;
+        }
+
+        .module:hover {
+            transform: translateY(-5px);
+            border-color: var(--z-primary);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .module:hover::before {
+            background: var(--z-primary);
+        }
+
+        /* Icons */
+        .mod-icon {
+            font-size: 2rem;
+            color: #555;
+            margin-bottom: 10px;
+            transition: 0.4s;
+        }
+
+        .mod-title {
+            font-family: 'Orbitron';
+            font-size: 1rem;
+            margin-bottom: 5px;
+            color: #fff;
+        }
+
+        .mod-desc {
+            font-size: 0.7rem;
+            color: #777;
+        }
+
+        /* --- ACTIVE STATE (The "Switch") --- */
+        .module.active {
+            background: rgba(138, 43, 226, 0.1);
+            border-color: var(--z-accent);
+        }
+
+        .module.active::before {
+            background: var(--z-accent);
+            box-shadow: 0 0 10px var(--z-accent);
+        }
+
+        .module.active .mod-icon {
+            color: var(--z-accent);
+            text-shadow: 0 0 15px var(--z-accent);
+            animation: pulseIcon 1.5s infinite;
+        }
+
+        .module.active .mod-title {
+            color: var(--z-accent);
+        }
+
+        /* --- STATUS INDICATOR (Bottom) --- */
+        .status-bar {
+            margin-top: 30px;
+            background: #000;
+            border: 1px solid #333;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: 'Share Tech Mono';
+        }
+
+        .sys-log {
+            color: #555;
+            font-size: 0.8rem;
+        }
+
+        .sys-log span {
+            color: var(--z-primary);
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes scan {
+            0% { width: 0; opacity: 0; }
+            50% { width: 300px; opacity: 1; }
+            100% { width: 0; opacity: 0; }
+        }
+
+        @keyframes pulseIcon {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Mobile Adjust */
+        @media (max-width: 500px) {
+            .module-grid {
+                grid-template-columns: 1fr; /* Stack on mobile */
+            }
+            h1 { font-size: 2.5rem; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="cyber-grid"></div>
+
+    <div id="z-loader">
+        <div class="scanner-line"></div>
+        <div class="loader-text" id="loader-text">INITIALIZING</div>
+    </div>
+
+    <div id="interface">
+        <header>
+            <h1>zDEMON</h1>
+            <div class="header-meta">
+                v9.0.1<br>
+                BUILD: 2049
+            </div>
+        </header>
+
+        <div class="module-grid">
+            <div class="module" onclick="toggleModule(this, 'AIMBOT_METAX')">
+                <div class="mod-icon">☸</div>
+                <div class="mod-title">METAX PROTOCOL</div>
+                <div class="mod-desc">Target acquisition and trajectory correction.</div>
+            </div>
+
+            <div class="module" onclick="toggleModule(this, 'AIM_CARAPETA')">
+                <div class="mod-icon">ꗈ</div>
+                <div class="mod-title">CARAPETA LOCK</div>
+                <div class="mod-desc">Magnetic crosshair stabilization engine.</div>
+            </div>
+
+            <div class="module" onclick="toggleModule(this, 'SCREEN_CAL')">
+                <div class="mod-icon">𖤍</div>
+                <div class="mod-title">TOUCH SYNC</div>
+                <div class="mod-desc">Zero-latency input calibration.</div>
+            </div>
+
+            <div class="module" onclick="toggleModule(this, 'MIOPRIME_CORE')">
+                <div class="mod-icon">ꙮ</div>
+                <div class="mod-title">MIOPRIME CORE</div>
+                <div class="mod-desc">Overclocked packet injection.</div>
+            </div>
+        </div>
+
+        <div class="status-bar">
+            <div class="sys-log" id="sys-log">SYSTEM IDLE...</div>
+            <div style="width: 10px; height: 10px; background: var(--z-accent); border-radius: 50%; box-shadow: 0 0 10px var(--z-accent);"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- BOOT SEQUENCE LOGIC ---
+        window.onload = () => {
+            const loaderText = document.getElementById('loader-text');
+            const loader = document.getElementById('z-loader');
+            const ui = document.getElementById('interface');
+
+            // Scramble Text Effect
+            const steps = ["LOADING ASSETS", "BYPASSING SECURITY", "DECRYPTING CORE", "zDEMON READY"];
+            let stepIndex = 0;
+
+            const interval = setInterval(() => {
+                if(stepIndex < steps.length) {
+                    loaderText.innerText = steps[stepIndex];
+                    loaderText.style.color = stepIndex % 2 === 0 ? '#8a2be2' : '#00f3ff';
+                    stepIndex++;
+                } else {
+                    clearInterval(interval);
+                    finishBoot();
+                }
+            }, 600);
+
+            function finishBoot() {
+                loader.style.transform = 'translateY(-100%)'; // Slide up
+                setTimeout(() => {
+                    ui.style.opacity = '1';
+                    ui.style.transform = 'scale(1) rotateX(0deg)';
+                }, 400);
+            }
+        };
+
+        // --- MODULE TOGGLE LOGIC ---
+        function toggleModule(element, codeName) {
+            const log = document.getElementById('sys-log');
+            const isActive = element.classList.contains('active');
+
+            if (!isActive) {
+                // ACTIVATE
+                element.classList.add('active');
+                scrambleLog(`>> EXECUTING ${codeName}...`);
+                
+                // Success feedback
+                setTimeout(() => {
+                    log.innerHTML = `>> <span style="color:#00f3ff">${codeName} ONLINE</span>`;
+                }, 800);
+
+            } else {
+                // DEACTIVATE
+                element.classList.remove('active');
+                log.innerHTML = `>> TERMINATING ${codeName}...`;
+                
+                setTimeout(() => {
+                    log.innerText = "SYSTEM IDLE...";
+                }, 800);
+            }
+        }
+
+        // Helper for text scramble effect on status bar
+        function scrambleLog(finalText) {
+            const log = document.getElementById('sys-log');
+            const chars = '!@#$%^&*()_+-=[]{}|;:,.<>?';
+            let iterations = 0;
+            
+            const interval = setInterval(() => {
+                log.innerText = finalText
+                    .split('')
+                    .map((letter, index) => {
+                        if(index < iterations) {
+                            return finalText[index];
+                        }
+                        return chars[Math.floor(Math.random() * chars.length)];
+                    })
+                    .join('');
+                
+                if(iterations >= finalText.length) clearInterval(interval);
+                iterations += 1/2; 
+            }, 30);
+        }
+    </script>
+</body>
+</html>
+
